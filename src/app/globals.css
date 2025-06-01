@@ -1,26 +1,70 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-purple: 104, 34, 208;    /* #6822d0 */
+  --color-blue: 117, 156, 255;      /* #759cff */
+  --color-lavender: 116, 96, 255;   /* #7460FF */
+  --color-green: 95, 250, 184;      /* #5FFAB8 */
+  --color-orange: 250, 125, 103;    /* #FA7D67 */
+  --color-dark: 18, 23, 36;         /* #121724 */
+  --color-light: 232, 233, 251;     /* #e8e9fb */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  --bg-primary: var(--color-dark);
+  --text-primary: var(--color-light);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Custom utility classes */
+.bg-sinusoid-purple { background-color: rgb(var(--color-purple)); }
+.bg-sinusoid-blue { background-color: rgb(var(--color-blue)); }
+.bg-sinusoid-lavender { background-color: rgb(var(--color-lavender)); }
+.bg-sinusoid-green { background-color: rgb(var(--color-green)); }
+.bg-sinusoid-orange { background-color: rgb(var(--color-orange)); }
+.bg-sinusoid-dark { background-color: rgb(var(--color-dark)); }
+.bg-sinusoid-light { background-color: rgb(var(--color-light)); }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+.text-sinusoid-purple { color: rgb(var(--color-purple)); }
+.text-sinusoid-blue { color: rgb(var(--color-blue)); }
+.text-sinusoid-lavender { color: rgb(var(--color-lavender)); }
+.text-sinusoid-green { color: rgb(var(--color-green)); }
+.text-sinusoid-orange { color: rgb(var(--color-orange)); }
+.text-sinusoid-dark { color: rgb(var(--color-dark)); }
+.text-sinusoid-light { color: rgb(var(--color-light)); }
+
+/* Background opacity utilities */
+.bg-sinusoid-purple\/10 { background-color: rgba(var(--color-purple), 0.1); }
+.bg-sinusoid-blue\/10 { background-color: rgba(var(--color-blue), 0.1); }
+.bg-sinusoid-lavender\/10 { background-color: rgba(var(--color-lavender), 0.1); }
+.bg-sinusoid-green\/10 { background-color: rgba(var(--color-green), 0.1); }
+.bg-sinusoid-orange\/10 { background-color: rgba(var(--color-orange), 0.1); }
+.bg-sinusoid-dark\/10 { background-color: rgba(var(--color-dark), 0.1); }
+.bg-sinusoid-light\/10 { background-color: rgba(var(--color-light), 0.1); }
+
+.bg-sinusoid-purple\/20 { background-color: rgba(var(--color-purple), 0.2); }
+.bg-sinusoid-blue\/20 { background-color: rgba(var(--color-blue), 0.2); }
+.bg-sinusoid-lavender\/20 { background-color: rgba(var(--color-lavender), 0.2); }
+.bg-sinusoid-green\/20 { background-color: rgba(var(--color-green), 0.2); }
+.bg-sinusoid-orange\/20 { background-color: rgba(var(--color-orange), 0.2); }
+.bg-sinusoid-dark\/20 { background-color: rgba(var(--color-dark), 0.2); }
+.bg-sinusoid-light\/20 { background-color: rgba(var(--color-light), 0.2); }
+
+.bg-sinusoid-purple\/50 { background-color: rgba(var(--color-purple), 0.5); }
+.bg-sinusoid-blue\/50 { background-color: rgba(var(--color-blue), 0.5); }
+.bg-sinusoid-lavender\/50 { background-color: rgba(var(--color-lavender), 0.5); }
+.bg-sinusoid-green\/50 { background-color: rgba(var(--color-green), 0.5); }
+.bg-sinusoid-orange\/50 { background-color: rgba(var(--color-orange), 0.5); }
+.bg-sinusoid-dark\/50 { background-color: rgba(var(--color-dark), 0.5); }
+.bg-sinusoid-light\/50 { background-color: rgba(var(--color-light), 0.5); }
+
+/* Border colors */
+.border-sinusoid-purple { border-color: rgb(var(--color-purple)); }
+.border-sinusoid-blue { border-color: rgb(var(--color-blue)); }
+.border-sinusoid-lavender { border-color: rgb(var(--color-lavender)); }
+.border-sinusoid-green { border-color: rgb(var(--color-green)); }
+.border-sinusoid-orange { border-color: rgb(var(--color-orange)); }
+.border-sinusoid-dark { border-color: rgb(var(--color-dark)); }
+.border-sinusoid-light { border-color: rgb(var(--color-light)); }
