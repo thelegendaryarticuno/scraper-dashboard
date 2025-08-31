@@ -26,10 +26,10 @@ export async function POST(request) {
         const websiteData = await request.json();
         
         // Validate required fields
-        const { url, phoneNumbers, emails, links } = websiteData;
-        if (!url) {
+        const { sourceUrl, phone, email, otherLinks, savedAt } = websiteData;
+        if (!sourceUrl) {
             return NextResponse.json(
-                { error: 'URL is a required field' },
+                { error: 'sourceUrl is a required field' },
                 { status: 400 }
             );
         }
@@ -37,7 +37,7 @@ export async function POST(request) {
         // Extract domain from URL
         let domain;
         try {
-            domain = extractDomain(url);
+            domain = extractDomain(sourceUrl);
         } catch (error) {
             return NextResponse.json(
                 { error: 'Invalid URL format' },
@@ -46,16 +46,16 @@ export async function POST(request) {
         }
 
         // Validate arrays
-        const phoneArray = Array.isArray(phoneNumbers) ? phoneNumbers : [];
-        const emailArray = Array.isArray(emails) ? emails : [];
-        const linksArray = Array.isArray(links) ? links : [];
+        const phoneArray = Array.isArray(phone) ? phone : [];
+        const emailArray = Array.isArray(email) ? email : [];
+        const linksArray = Array.isArray(otherLinks) ? otherLinks : [];
 
         // Validate email formats in email array
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        for (const email of emailArray) {
-            if (!emailRegex.test(email)) {
+        for (const emailAddr of emailArray) {
+            if (!emailRegex.test(emailAddr)) {
                 return NextResponse.json(
-                    { error: `Invalid email format: ${email}` },
+                    { error: `Invalid email format: ${emailAddr}` },
                     { status: 400 }
                 );
             }
@@ -63,7 +63,7 @@ export async function POST(request) {
 
         // Connect to database
         const { db } = await connectToDatabase();
-        const contactsCollection = db.collection('contacts');
+        const contactsCollection = db.collection('contacts'); // Changed to use contacts collection
 
         // Check if website with this domain already exists
         const existingWebsite = await contactsCollection.findOne({ domain });
@@ -71,13 +71,11 @@ export async function POST(request) {
         if (existingWebsite) {
             // Append new data to existing website
             const updatedData = {
-                sourceUrl: url, // Update main URL (frontend expects sourceUrl)
+                sourceUrl: sourceUrl,
                 phone: mergeUniqueArrays(existingWebsite.phone, phoneArray),
                 email: mergeUniqueArrays(existingWebsite.email, emailArray),
-                otherLinks: mergeUniqueArrays(existingWebsite.otherLinks, linksArray.map(link => 
-                    typeof link === 'string' ? { url: link, text: link } : link
-                )),
-                savedAt: new Date(),
+                otherLinks: mergeUniqueArrays(existingWebsite.otherLinks, linksArray),
+                savedAt: savedAt ? new Date(savedAt) : new Date(),
                 updatedAt: new Date()
             };
 
@@ -102,9 +100,9 @@ export async function POST(request) {
                         otherLinks: updatedWebsite.otherLinks,
                         savedAt: updatedWebsite.savedAt,
                         createdAt: updatedWebsite.createdAt,
-                        totalPhones: updatedWebsite.phone.length,
-                        totalEmails: updatedWebsite.email.length,
-                        totalLinks: updatedWebsite.otherLinks.length
+                        totalPhones: updatedWebsite.phone?.length || 0,
+                        totalEmails: updatedWebsite.email?.length || 0,
+                        totalLinks: updatedWebsite.otherLinks?.length || 0
                     }
                 },
                 { status: 200 }
@@ -113,13 +111,11 @@ export async function POST(request) {
             // Create new website entry
             const websiteToSave = {
                 domain,
-                sourceUrl: url, // Frontend expects sourceUrl
+                sourceUrl: sourceUrl,
                 phone: phoneArray,
                 email: emailArray,
-                otherLinks: linksArray.map(link => 
-                    typeof link === 'string' ? { url: link, text: link } : link
-                ),
-                savedAt: new Date(),
+                otherLinks: linksArray,
+                savedAt: savedAt ? new Date(savedAt) : new Date(),
                 createdAt: new Date(),
                 updatedAt: new Date()
             };
@@ -133,14 +129,14 @@ export async function POST(request) {
                     website: {
                         id: result.insertedId,
                         domain,
-                        sourceUrl: url,
+                        sourceUrl: sourceUrl,
                         phone: phoneArray,
                         email: emailArray,
-                        otherLinks: websiteToSave.otherLinks,
+                        otherLinks: linksArray,
                         savedAt: websiteToSave.savedAt,
                         totalPhones: phoneArray.length,
                         totalEmails: emailArray.length,
-                        totalLinks: websiteToSave.otherLinks.length
+                        totalLinks: linksArray.length
                     }
                 },
                 { status: 201 }
@@ -157,17 +153,36 @@ export async function POST(request) {
     }
 }
 
+// Optional: Add GET method to retrieve websites
 export async function GET() {
-  try {
-    const { db } = await connectToDatabase();
-    const contacts = await db.collection('contacts').find({}).toArray();
-    
-    return NextResponse.json(contacts, {
-      status: 200,
-    });
-  } catch (error) {
-    return NextResponse.json({ error: error.message }, {
-      status: 500,
-    });
-  }
+    try {
+        const { db } = await connectToDatabase();
+        const contactsCollection = db.collection('contacts');
+        
+        const websites = await contactsCollection.find({}).toArray();
+        
+        return NextResponse.json({
+            websites: websites.map(website => ({
+                id: website._id,
+                domain: website.domain,
+                sourceUrl: website.sourceUrl,
+                phone: website.phone || [],
+                email: website.email || [],
+                otherLinks: website.otherLinks || [],
+                totalPhones: (website.phone || []).length,
+                totalEmails: (website.email || []).length,
+                totalLinks: (website.otherLinks || []).length,
+                createdAt: website.createdAt,
+                updatedAt: website.updatedAt,
+                savedAt: website.savedAt
+            })),
+            totalWebsites: websites.length
+        });
+    } catch (error) {
+        console.error('Error fetching websites:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
 }
